@@ -21,6 +21,7 @@ def exchange_rate(k_0, k_a, k_b, ph, pk_w=14.0):
     -------
     k : float
         The proton exchange rate [Hz].
+
     """
 
     k = k_0 + k_a*10.0**(-ph) + k_b*10.0**(ph-pk_w)
@@ -43,6 +44,7 @@ def frequency_to_ppm(w, w_0):
     -------
     ppm : float
         The relative frequency shift [ppm].
+
     """
 
     ppm = (w-w_0)/(w_0*1e-6)
@@ -65,6 +67,7 @@ def ppm_to_frequency(ppm, w_0):
     -------
     w : float
         The absolute frequency [Hz].
+
     """
 
     w = w_0*(1.0 + ppm*1e-6)

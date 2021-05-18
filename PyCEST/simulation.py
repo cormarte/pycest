@@ -190,7 +190,7 @@ def __bloch_mcconell_continuous_wave_n_pools_analytical(t, w_1, m_0, dw, k, r1, 
     Returns
     -------
     m_az : ndarray
-        The final Z-magnetization of pool A at time t [T].
+        The final Z-magnetization of pool 1 at time t [T].
 
     """
 
@@ -301,7 +301,7 @@ def __bloch_mcconell_continuous_wave_n_pools_init(dw, b_1, b_0, db_0, w_c, m_az_
     m_0[-1] = 1.0
 
     for i in range(len(w)):
-        m_0[3*i+2] = (c[i]/c[0])*m_az_0
+        m_0[3*i+2] = (c[i]/c[0])*m_az_0  # Equilibrium magnetization is proportional to the proton density.
 
     w = np.array([ppm_to_frequency(w[i], w_0) for i in range(len(w))])
     dw = np.array([w-w_i[i] for i in range(len(w_i))])
