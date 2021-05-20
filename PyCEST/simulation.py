@@ -312,7 +312,7 @@ def __bloch_mcconell_continuous_wave_n_pools_init(dw, b_1, b_0, db_0, w_c, m_az_
     return w_1, m_0, dw, k, r1, r2
 
 
-@list_as_numpy
+#@list_as_numpy
 def bloch_mcconell_continuous_wave_2_pools_analytical(t, dw, b_1, t1_a, t2_a, w_b, t1_b, t2_b, c_b, k_b, b_0=3.0,
                                                       db_0=0.0, w_c=None, m_az_0=1.0, w_a=0.0,
                                                       c_a=PROTON_WATER_CONCENTRATION):
@@ -327,9 +327,9 @@ def bloch_mcconell_continuous_wave_2_pools_analytical(t, dw, b_1, t1_a, t2_a, w_
 
     Parameters
     ----------
-    t : list or ndarray
+    t : ndarray
         The saturation times [s].
-    dw : list or ndarray
+    dw : ndarray
         The saturation frequency offsets [Hz].
     b_1 : float
         The amplitude of the continuous RF pulse B1 [T].
@@ -502,7 +502,7 @@ def bloch_mcconell_continuous_wave_2_pools_fdm(t, dw, b_1, t1_a, t2_a, w_b, t1_b
     return m_az
 
 
-@list_as_numpy
+#@list_as_numpy
 def bloch_mcconell_continuous_wave_2_pools_analytical_parallel(t, dw, b_1, t1_a, t2_a, w_b, t1_b, t2_b, c_b, k_b,
                                                                b_0=3.0, db_0=0.0, w_c=None, m_az_0=1.0, w_a=0.0,
                                                                c_a=PROTON_WATER_CONCENTRATION, threads=16):
@@ -517,9 +517,9 @@ def bloch_mcconell_continuous_wave_2_pools_analytical_parallel(t, dw, b_1, t1_a,
 
     Parameters
     ----------
-    t : list or ndarray
+    t : ndarray
         The saturation times [s].
-    dw : list or ndarray
+    dw : ndarray
         The saturation frequency offsets [Hz].
     b_1 : float
         The amplitude of the continuous RF pulse B1 [T].
@@ -589,7 +589,7 @@ def bloch_mcconell_continuous_wave_2_pools_analytical_parallel(t, dw, b_1, t1_a,
     return m_az
 
 
-@list_as_numpy
+#@list_as_numpy
 def bloch_mcconell_continuous_wave_2_pools_steady_state(dw, b_1, t1_a, t2_a, w_b, t1_b, t2_b, c_b, k_b, b_0=3.0,
                                                         db_0=0.0, w_c=None, m_az_0=1.0, w_a=0.0,
                                                         c_a=PROTON_WATER_CONCENTRATION):
@@ -604,7 +604,7 @@ def bloch_mcconell_continuous_wave_2_pools_steady_state(dw, b_1, t1_a, t2_a, w_b
 
     Parameters
     ----------
-    dw : list or ndarray
+    dw : ndarray
         The saturation frequency offsets [Hz].
     b_1 : float
         The amplitude of the continuous RF pulse B1 [T].
