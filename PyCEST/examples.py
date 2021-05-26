@@ -2,15 +2,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PyCEST.constants import PROTON_WATER_CONCENTRATION
 from PyCEST.fitting import z_spectrum_fit
-from PyCEST.simulation import bloch_mcconell_continuous_wave_2_pools_steady_state, \
-    bloch_mcconell_continuous_wave_n_pools_analytical_parallel
+from PyCEST.modelling import bloch_mcconell_continuous_wave_2_pools_steady_state, \
+    bloch_mcconell_continuous_wave_n_pools_analytical_parallel, lorentzian_n_pools
 
 
-def z_spectrum_plot_example():
+def z_spectrum_plot():
 
-    """Examples of Z-spectrum plots.
+    """Z-spectrum plot example.
 
-    See Khlebnikov et al. Sci. Rep. 9:1089. 2019.
+    Numerical values from Khlebnikov et al. Sci. Rep. 9:1089. 2019.
 
     """
 
@@ -45,9 +45,11 @@ def z_spectrum_plot_example():
     plt.plot(dw, z_spectrum, 'k')
 
     # Let us now compute the dynamic Z-spectrum using the n-pool analytical implementation
-    z_spectrum = bloch_mcconell_continuous_wave_n_pools_analytical_parallel(t, dw, b_1, [w_a, w_b], [t1_a, t1_b],
-                                                                            [t2_a, t2_b], [c_a, c_b], [k_b], b_0=b_0,
-                                                                            db_0=db_0, w_c=w_c, m_az_0=m_az_0,
+    z_spectrum = bloch_mcconell_continuous_wave_n_pools_analytical_parallel(t, dw, b_1, np.array([w_a, w_b]),
+                                                                            np.array([t1_a, t1_b]),
+                                                                            np.array([t2_a, t2_b]),
+                                                                            np.array([c_a, c_b]), np.array([k_b]),
+                                                                            b_0=b_0, db_0=db_0, w_c=w_c, m_az_0=m_az_0,
                                                                             threads=16)
 
     plt.plot(dw, z_spectrum[5, :], 'g')   # Steady-state is not reached yet after a 5 s saturation.
@@ -55,7 +57,13 @@ def z_spectrum_plot_example():
     plt.show()
 
 
-def z_spectrum_fit_example():
+def bloch_mcconnell_fit():
+
+    """Bloch-McConnell Z-spectrum fit example.
+
+    Numerical values from Khlebnikov et al. Sci. Rep. 9:1089. 2019.
+
+    """
 
     z = np.load('./data/example/z.npy')    # The measured Z-magnetization of pool A [T]. Loaded from example data.
     dw = np.load('./data/example/dw.npy')  # The saturation frequency offsets [Hz]. Loaded from example data.
@@ -79,8 +87,8 @@ def z_spectrum_fit_example():
                                            # fitted here.
     k_b = 49.0                             # The true exchange rate from pool B to pool A [Hz]. Will be fitted here.
 
-    # The non-fitted parameters of PyCEST.simulation.bloch_mcconell_continuous_wave_2_pools_steady_state. dw (the first
-    # unspecified argument) will be used as xdata. The other unspecified arguments w_b, c_b, k_b and db_0 will be
+    # The non-fitted arguments of PyCEST.modelling.bloch_mcconell_continuous_wave_2_pools_steady_state. dw (the first
+    # unspecified argument) will be used as xdata. The other unspecified arguments (w_b, c_b, k_b, and db_0) will be
     # fitted.
     params = {'b_1': b_1,
               't1_a': t1_a,
@@ -96,11 +104,50 @@ def z_spectrum_fit_example():
     # The lower and upper bounds for w_b, c_b, k_b and db_0.
     bounds = ((2.7, 0.01, 10.0, 8e-4), (3.0, 1.0, 1000.0, 1e-3))
 
-    p = z_spectrum_fit(dw, z, bloch_mcconell_continuous_wave_2_pools_steady_state, params, bounds=bounds)
-    print(f'Fitted values: {p}, True values: {[w_b, c_b, k_b, db_0]}')
+    p, z_ = z_spectrum_fit(dw, z, bloch_mcconell_continuous_wave_2_pools_steady_state, params, bounds=bounds)
+    print(f'Fitted values: {p}, True values: {[w_b, c_b, k_b, db_0]}.')
+
+
+def lorentzian_fit():
+
+    """Lorentzian Z-spectrum fit example.
+
+    Numerical values from Khlebnikov et al. Sci. Rep. 9:1089. 2019.
+
+    """
+
+    z = np.load('./data/example/z.npy')    # The measured Z-magnetization of pool A [T]. Loaded from example data.
+    dw = np.load('./data/example/dw.npy')  # The saturation frequency offsets [Hz].
+    b_0 = 3.0                              # The reference static field value [T].
+    db_0 = 0.000898                        # The reference static field offset value [T]. Typically return by a B0 map.
+    w_c = 127770676.0                      # The center imaging frequency [Hz]. Typically found in the DICOM header.
+
+    # Pool A: Water
+    w_a = 0.0  # The resonance frequency of pool A [ppm].
+
+    # Pool B: Gln
+    w_b = 2.87  # The resonance frequency of pool B [ppm].
+
+    # The non-fitted arguments of PyCEST.modelling.lorentzian_n_pools. dw (the first unspecified argument) will be used
+    # as xdata. The other unspecified arguments (w, a, s, and db_0) will be fitted.
+    params = {'b_0': b_0,
+              'w_c': w_c}
+
+    # Bounds must be specified as ndarrays for ndarray arguments of PyCEST.modelling.lorentzian_n_pools.
+    bounds = ((np.array([w_a, 2.7]), np.array([0.0, 0.0]), np.array([100.0, 100.0]), 8e-4),
+              (np.array([w_a+1.0e-4, 3.0]), np.array([1.0, 1.0]), np.array([10000.0, 10000.0]), 1e-3))
+
+    p, z_ = z_spectrum_fit(dw, z, lorentzian_n_pools, params, bounds=bounds)
+    print(f'Fitted values: {p}.')
+
+    plt.figure()
+    plt.plot(dw, z)
+    plt.plot(dw, z_)
+    plt.show()
 
 
 if __name__ == '__main__':
 
-    #z_spectrum_plot_example()
-    z_spectrum_fit_example()
+    # z_spectrum_plot()
+    # bloch_mcconnell_fit()
+    lorentzian_fit()

@@ -3,7 +3,7 @@ import numpy as np
 import sympy
 from numpy import ndarray
 from PyCEST.constants import PROTON_GYROMAGNETIC_RATIO, PROTON_WATER_CONCENTRATION
-from PyCEST.core import list_as_numpy
+#from PyCEST.core import list_as_numpy
 from PyCEST.utils import ppm_to_frequency
 from scipy.linalg import expm
 
@@ -787,7 +787,7 @@ def bloch_mcconell_continuous_wave_3_pools_steady_state_sym():
     return solution[m_az]
 
 
-@list_as_numpy
+#@list_as_numpy
 def bloch_mcconell_continuous_wave_n_pools_analytical(t, dw, b_1, w, t1, t2, c, k, b_0=3.0, db_0=0.0, w_c=None,
                                                       m_az_0=1.0):
 
@@ -800,21 +800,21 @@ def bloch_mcconell_continuous_wave_n_pools_analytical(t, dw, b_1, w, t1, t2, c, 
 
     Parameters
     ----------
-    t : list or ndarray
+    t : ndarray
         The saturation times [s].
-    dw : list or ndarray
+    dw : ndarray
         The saturation frequency offsets [Hz].
     b_1 : float
         The amplitude of the continuous RF pulse B1 [T].
-    w : list or ndarray
+    w : ndarray
         The resonance frequencies of the n pools [ppm].
-    t1 : list or ndarray
+    t1 : ndarray
         The T1 values of the n pools [s].
-    t2 : list or ndarray
+    t2 : ndarray
         The T2 values of the n pools [s].
-    c : list or ndarray
+    c : ndarray
         The concentrations of exchangeable protons of the n pools [M.].
-    k : list or ndarray
+    k : ndarray
         The exchange rates from pools 2:n to pool 1 [Hz].
     b_0 : float, optional
         The reference static field value [T]. Default: 3.0.
@@ -843,7 +843,7 @@ def bloch_mcconell_continuous_wave_n_pools_analytical(t, dw, b_1, w, t1, t2, c, 
     return m_az
 
 
-@list_as_numpy
+#@list_as_numpy
 def bloch_mcconell_continuous_wave_n_pools_analytical_parallel(t, dw, b_1, w, t1, t2, c, k, b_0=3.0, db_0=0.0, w_c=None,
                                                                m_az_0=1.0, threads=16):
 
@@ -857,21 +857,21 @@ def bloch_mcconell_continuous_wave_n_pools_analytical_parallel(t, dw, b_1, w, t1
 
     Parameters
     ----------
-    t : list or ndarray
+    t : ndarray
         The saturation times [s].
-    dw : list or ndarray
+    dw : ndarray
         The saturation frequency offsets [Hz].
     b_1 : float
         The amplitude of the continuous RF pulse B1 [T].
-    w : list or ndarray
+    w : ndarray
         The resonance frequencies of the n pools [ppm].
-    t1 : list or ndarray
+    t1 : ndarray
         The T1 values of the n pools [s].
-    t2 : list or ndarray
+    t2 : ndarray
         The T2 values of the n pools [s].
-    c : list or ndarray
+    c : ndarray
         The concentrations of exchangeable protons of the n pools [M.].
-    k : list or ndarray
+    k : ndarray
         The exchange rates from pools 2:n to pool 1 [Hz].
     b_0 : float, optional
         The reference static field value [T]. Default: 3.0.
@@ -911,6 +911,64 @@ def bloch_mcconell_continuous_wave_n_pools_analytical_parallel(t, dw, b_1, w, t1
         for j in range(len(dw)):
             m_az[i, j] = results[index].get()
             index += 1
+
+    return m_az
+
+
+def lorentzian_n_pools(dw, w, a, s, b_0=3.0, db_0=0.0, w_c=None):
+
+    """Computes an approximation of the Z-magnetization of a reference proton pool after saturation by an RF pulse with
+    frequency w_c + dw for n exchangeable proton pools immersed in a static field with amplitude b_0 + db_0 using a
+    Lorentzian model.
+
+    The pools have resonance frequencies w and are modelled by means of Lorentzian functions with amplitudes a and FWHM
+    s.
+
+    Parameters
+    ----------
+    dw : ndarray
+        The saturation frequency offsets [Hz].
+    w : ndarray
+        The resonance frequencies of the n pools [ppm].
+    a : ndarray
+        The peak amplitudes of the n pools [T].
+    s : ndarray
+        The peak FWHM of the n pools [Hz].
+    b_0 : float, optional
+        The reference static field value [T]. Default: 3.0.
+    db_0 : float, optional
+        The reference static field offset value [T]. Default: 0.0.
+    w_c : float, optional
+        The center imaging frequency [Hz]. Default: None (PyCEST.constants.PROTON_GYROMAGNETIC_RATIO*b_0 is used).
+
+    Returns
+    -------
+    m_az : ndarray
+        The final Z-magnetization of pool 1 for the specified frequencies [T].
+
+    """
+
+    b_0 = b_0 + db_0
+    w_0 = PROTON_GYROMAGNETIC_RATIO*b_0
+
+    if w_c is None:
+        w_c = w_0
+        print('Warning: the central imaging frequency was not set. 1H resonance frequency will be used.')
+    else:
+        w_c = 2.0*np.pi*w_c
+    dw = 2.0*np.pi*dw
+    w_i = w_c + dw
+    w = np.array([ppm_to_frequency(w[i], w_0) for i in range(len(w))])
+
+    m = len(w_i)
+    n = len(a)
+
+    w_i = np.transpose(np.tile(w_i, (n, 1)))
+    w = np.tile(w, (m, 1))
+    a = np.tile(a, (m, 1))
+    s = np.tile(s, (m, 1))
+
+    m_az = 1.0-np.sum(a/(1.0 + 4.0*np.square((w_i-w)/s)), axis=1)
 
     return m_az
 
