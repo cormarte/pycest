@@ -61,6 +61,8 @@ def z_spectrum_plot():
                                                                      w_a=w_a, c_a=c_a)
 
     plt.figure()
+    plt.xlabel('Frequency Offset (Hz)')
+    plt.ylabel('Relative Z-Magnetization')
     plt.plot(dw, z_spectrum, 'k')
 
     # Let us now compute the dynamic Z-spectrum using the n-pool analytical implementation
@@ -167,6 +169,6 @@ def lorentzian_fit():
 
 if __name__ == '__main__':
 
-    # z_spectrum_plot()
+    z_spectrum_plot()
     # bloch_mcconnell_fit()
-    lorentzian_fit()
+    # lorentzian_fit()
