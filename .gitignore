@@ -1,4 +1,5 @@
-.idea/
-data/
-src/licenses.txt
-src/test.py
+/.idea/
+/data/
+/src/pycest/__pycache__/
+/src/licenses.txt
+/src/test.py
