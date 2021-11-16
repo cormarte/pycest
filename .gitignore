@@ -1,5 +1,4 @@
 .idea/
 data/
-*/__pycache__/
 src/licenses.txt
 src/test.py
